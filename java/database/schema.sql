@@ -5,7 +5,7 @@ drop table if exists murder;
 drop table if exists game_card;
 drop table if exists card_type;
 drop table if exists vision_player;
-drop table if exists vision_card;
+drop table if exists visions;
 drop table if exists player;
 drop table if exists users;
 DROP SEQUENCE IF EXISTS seq_user_id;
@@ -87,16 +87,16 @@ create table murder(
 	constraint fk_weapon_card_id foreign key(weapon_card_id) references game_card(game_card_id)
 );
 
-create table vision_card(
-	vision_card_id serial, 
+create table visions(
+	vision_id serial, 
 	zone varchar(16),
 	img_url varchar(64),
 	
-	constraint pk_vision_card_id primary key (vision_card_id),
+	constraint pk_vision_id primary key (vision_id),
 	constraint chk_zone check (zone in ('deck', 'hand', 'discard', 'player1', 'player2', 'player3', 'player4'))
 );
 
-insert into vision_card (zone, img_url)
+insert into visions (zone, img_url)
 values ('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),
 ('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),
 ('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),
@@ -111,12 +111,12 @@ values ('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeho
 
 create table vision_player(
 	player_id int, 
-	vision_card_id int,
+	vision_id int,
 	investigation_phase int,
 	
-	constraint pk_player_id_vision_id primary key(player_id, vision_card_id), 
+	constraint pk_player_id_vision_id primary key(player_id, vision_id), 
 	constraint fk_player_id foreign key(player_id) references player(player_id),
-	constraint fk_vision_card_id foreign key(vision_card_id) references vision_card(vision_card_id)
+	constraint fk_vision_id foreign key(vision_id) references visions(vision_id)
 );
 
 COMMIT TRANSACTION;
