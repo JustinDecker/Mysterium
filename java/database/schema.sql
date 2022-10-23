@@ -1,12 +1,13 @@
 BEGIN TRANSACTION;
 
-drop table if exists night;
-drop table if exists murder;
+drop table if exists player_prediction;
+drop table if exists murders;
 drop table if exists game_card;
 drop table if exists card_type;
 drop table if exists vision_player;
 drop table if exists visions;
-drop table if exists player;
+drop table if exists players;
+drop table if exists games;
 drop table if exists users;
 DROP SEQUENCE IF EXISTS seq_user_id;
 
@@ -25,6 +26,7 @@ CREATE TABLE users (
 	CONSTRAINT PK_user PRIMARY KEY (user_id)
 );
 
+--test data, remove after
 INSERT INTO users (username,password_hash,role) VALUES ('ghost','$2a$08$UkVvwpULis18S19S5pZFn.YHPZt3oaqHZnDwqbCW9pft6uFtkXKDC','ROLE_USER');
 INSERT INTO users (username,password_hash,role) VALUES ('psychic1','$2a$08$UkVvwpULis18S19S5pZFn.YHPZt3oaqHZnDwqbCW9pft6uFtkXKDC','ROLE_USER');
 INSERT INTO users (username,password_hash,role) VALUES ('psychic2','$2a$08$UkVvwpULis18S19S5pZFn.YHPZt3oaqHZnDwqbCW9pft6uFtkXKDC','ROLE_USER');
@@ -33,28 +35,35 @@ INSERT INTO users (username,password_hash,role) VALUES ('psychic3','$2a$08$UkVvw
 INSERT INTO users (username,password_hash,role) VALUES ('admin','$2a$08$UkVvwpULis18S19S5pZFn.YHPZt3oaqHZnDwqbCW9pft6uFtkXKDC','ROLE_ADMIN');
 
 
-
-create table night(
-	game serial, 
+create table games(
+	game_id serial, 
 	night int not null,
 	phase int not null,
 	number_of_psychics int not null,
 	
-	constraint pk_game primary key(game)
+	constraint pk_game_id primary key(game_id)
 );
 
-insert into night (night, phase, number_of_psychics) values (0,0,3);
+insert into games (night, phase, number_of_psychics) values (0,0,3);
 
-create table player(
-	player_id serial,
-	role_id int not null,
+create table players(
+	player_id int unique,
+	game_id int not null,
+	role varchar not null,
 	psychic_level int not null,
 	guesses_left int not null,
 	investigation_phase int,
+	current_guess int,
 	
 	constraint pk_player_id primary key(player_id),
-	constraint fk_player_id FOREIGN key(player_id) REFERENCES users(user_id)
+	constraint fk_game_id foreign key(game_id) references games(game_id),
+	constraint fk_player_id FOREIGN key(player_id) REFERENCES users(user_id),
+	constraint chk_role check (role in ('ghost', 'psychic'))
 );
+
+--test data, remove after
+insert into players (player_id, role, game_id, psychic_level, guesses_left, investigation_phase, current_guess)
+values (1, 'ghost', 1, 0, 0, 0, -1), (2, 'psychic', 1, 0, 4, 0, -1), (3, 'psychic', 1, 0, 4, 0, -1), (4, 'psychic', 1, 0, 4, 0, -1);
 
 create table card_type(
 	card_type_id serial, 
@@ -73,7 +82,7 @@ create table game_card(
 );
 
 
-create table murder(
+create table murders(
 	murder_id serial,
 	player_id int, 
 	person_card_id int, 
@@ -81,7 +90,7 @@ create table murder(
 	weapon_card_id int,
 	
 	constraint pk_murder_id primary key(murder_id),
-	constraint fk_player_id foreign key(player_id) references player(player_id),
+	constraint fk_player_id foreign key(player_id) references players(player_id),
 	constraint fk_person_card_id foreign key(person_card_id) references game_card(game_card_id),
 	constraint fk_location_card_id foreign key(location_card_id) references game_card(game_card_id),
 	constraint fk_weapon_card_id foreign key(weapon_card_id) references game_card(game_card_id)
@@ -93,11 +102,12 @@ create table visions(
 	img_url varchar(64),
 	
 	constraint pk_vision_id primary key (vision_id),
-	constraint chk_zone check (zone in ('deck', 'hand', 'discard', 'player1', 'player2', 'player3', 'player4'))
+	constraint chk_zone check (zone in ('deck', 'hand', 'discard', 'player'))
 );
 
+--test data, update img_url and zone of first three
 insert into visions (zone, img_url)
-values ('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),
+values ('player', 'placeholder_url'),('player', 'placeholder_url'),('player', 'placeholder_url'),('player', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),
 ('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),
 ('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),
 ('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeholder_url'),
@@ -111,12 +121,27 @@ values ('deck', 'placeholder_url'),('deck', 'placeholder_url'),('deck', 'placeho
 
 create table vision_player(
 	player_id int, 
-	vision_id int,
-	investigation_phase int,
+	vision_id int unique,
 	
 	constraint pk_player_id_vision_id primary key(player_id, vision_id), 
-	constraint fk_player_id foreign key(player_id) references player(player_id),
+	constraint fk_player_id foreign key(player_id) references players(player_id),
 	constraint fk_vision_id foreign key(vision_id) references visions(vision_id)
 );
+
+--test data, delete
+insert into vision_player values (2,1),(3,2),(4,3),(4,4);
+
+create table player_prediction(
+	player_id int,
+	other_player_id int,
+	prediction boolean,
+	
+	constraint pk_player_id_other_player_id primary key (player_id, other_player_id),
+	constraint fk_player_id foreign key(player_id) references players(player_id),
+	constraint fk_other_player_id foreign key(other_player_id) references players(player_id),
+	constraint chk_player_id_cant_equal_other_player_id check (player_id != other_player_id)
+);
+
+insert into player_prediction values (1,2,true);
 
 COMMIT TRANSACTION;
