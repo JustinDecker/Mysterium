@@ -5,6 +5,12 @@ public class Vision {
     private String zone;
     private String imgUrl;
 
+    public Vision(int visionId, String zone, String imgUrl){
+        this.visionId = visionId;
+        this.zone = zone;
+        this.imgUrl = imgUrl;
+    }
+
     public int getVisionId() {
         return visionId;
     }

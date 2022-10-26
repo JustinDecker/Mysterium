@@ -6,6 +6,9 @@ import java.util.List;
 public class Psychic {
 
     private int playerId;
+
+    private String username;
+    private  int psychicLevel;
     private int remainingGuesses;
     private int investigationPhase;
     private int currentGuess;
@@ -25,6 +28,14 @@ public class Psychic {
 
     public void setPlayerId(int playerId) {
         this.playerId = playerId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public int getRemainingGuesses() {
@@ -65,5 +76,13 @@ public class Psychic {
 
     public void addPredictionToList(Prediction prediction) {
         this.predictionList.add(prediction);
+    }
+
+    public int getPsychicLevel() {
+        return psychicLevel;
+    }
+
+    public void setPsychicLevel(int psychicLevel) {
+        this.psychicLevel = psychicLevel;
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 public class GameStateDTO {
 
+    private int gameId;
     private int night;
 
     private int phase;
@@ -14,6 +15,15 @@ public class GameStateDTO {
     public GameStateDTO(){
         this.psychicList = new ArrayList<>();
     }
+
+    public int getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
+    }
+
     public int getNight() {
         return night;
     }

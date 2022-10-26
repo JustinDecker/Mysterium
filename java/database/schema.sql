@@ -51,7 +51,7 @@ create table players(
 	game_id int not null,
 	role varchar not null,
 	psychic_level int not null,
-	guesses_left int not null,
+	remaining_guesses int not null,
 	investigation_phase int,
 	current_guess int,
 	
@@ -62,7 +62,7 @@ create table players(
 );
 
 --test data, remove after
-insert into players (player_id, role, game_id, psychic_level, guesses_left, investigation_phase, current_guess)
+insert into players (player_id, role, game_id, psychic_level, remaining_guesses, investigation_phase, current_guess)
 values (1, 'ghost', 1, 0, 0, 0, -1), (2, 'psychic', 1, 0, 4, 0, -1), (3, 'psychic', 1, 0, 4, 0, -1), (4, 'psychic', 1, 0, 4, 0, -1);
 
 create table card_type(
@@ -133,13 +133,13 @@ insert into vision_player values (2,1),(3,2),(4,3),(4,4);
 
 create table player_prediction(
 	player_id int,
-	other_player_id int,
+	foreign_player_id int,
 	prediction boolean,
 	
-	constraint pk_player_id_other_player_id primary key (player_id, other_player_id),
+	constraint pk_player_id_foreign_player_id primary key (player_id, foreign_player_id),
 	constraint fk_player_id foreign key(player_id) references players(player_id),
-	constraint fk_other_player_id foreign key(other_player_id) references players(player_id),
-	constraint chk_player_id_cant_equal_other_player_id check (player_id != other_player_id)
+	constraint fk_foreign_player_id foreign key(foreign_player_id) references players(player_id),
+	constraint chk_player_id_cant_equal_foreign_player_id check (player_id != foreign_player_id)
 );
 
 insert into player_prediction values (1,2,true);
