@@ -23,8 +23,8 @@ const router = new Router({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: Home,
+      name: 'game',
+      component: Game,
       meta: {
         requiresAuth: true
       }

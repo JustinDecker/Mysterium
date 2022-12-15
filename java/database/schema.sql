@@ -71,16 +71,22 @@ create table card_type(
 	
 	constraint pk_card_type_id primary key(card_type_id)
 );
+insert into card_type (description) values ('person'),('location'),('weapon');
 
 create table game_card(
 	game_card_id serial, 
 	card_type_id int,
 	img_url varchar(64),
+	zone varchar(16),
 	
 	constraint pk_game_card_id primary key (game_card_id),
-	constraint fk_card_type_id foreign key(card_type_id) references card_type(card_type_id)
+	constraint fk_card_type_id foreign key(card_type_id) references card_type(card_type_id),
+	constraint chk_zone check (zone in ('deck', 'play'))
 );
-
+insert into game_card (card_type_id, img_url, zone) values 
+(1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'), (1,'placeholder', 'deck'),
+(2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'), (2,'placeholder', 'deck'),
+(3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck'), (3,'placeholder', 'deck');
 
 create table murders(
 	murder_id serial,
@@ -93,7 +99,10 @@ create table murders(
 	constraint fk_player_id foreign key(player_id) references players(player_id),
 	constraint fk_person_card_id foreign key(person_card_id) references game_card(game_card_id),
 	constraint fk_location_card_id foreign key(location_card_id) references game_card(game_card_id),
-	constraint fk_weapon_card_id foreign key(weapon_card_id) references game_card(game_card_id)
+	constraint fk_weapon_card_id foreign key(weapon_card_id) references game_card(game_card_id),
+	constraint chk_person_card check (person_card_id >= 1 and person_card_id <= 18),
+	constraint chk_location_card check (location_card_id >= 19 and location_card_id <= 36),
+	constraint chk_weapon_card check (weapon_card_id >= 37 and weapon_card_id <= 54)
 );
 
 create table visions(
@@ -142,6 +151,6 @@ create table player_prediction(
 	constraint chk_player_id_cant_equal_foreign_player_id check (player_id != foreign_player_id)
 );
 
-insert into player_prediction values (1,2,true);
+insert into player_prediction values (2,3,true);
 
 COMMIT TRANSACTION;

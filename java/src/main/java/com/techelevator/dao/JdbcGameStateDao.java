@@ -1,9 +1,6 @@
 package com.techelevator.dao;
 
-import com.techelevator.model.GameStateDTO;
-import com.techelevator.model.Prediction;
-import com.techelevator.model.Psychic;
-import com.techelevator.model.Vision;
+import com.techelevator.model.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -20,7 +17,6 @@ public class JdbcGameStateDao implements GameStateDao{
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Override
     public GameStateDTO getGameStateByUsername(String username) {
         
         String sql = "select games.game_id, night, phase, users.username, players.player_id, psychic_level, remaining_guesses, investigation_phase, current_guess, vision_player.vision_id, visions.img_url " +
@@ -44,10 +40,8 @@ public class JdbcGameStateDao implements GameStateDao{
 
     private GameStateDTO mapRowSetToGameStateDTO(SqlRowSet rs){
         GameStateDTO gameStateDTO = new GameStateDTO();
-        List<Psychic> psychicList = new ArrayList<>();
 
         int lastPsychicId = 0;
-        int psychicIndex = 0;
         int currentId = 0;
         Psychic psychic = new Psychic();
         while(rs.next()) {
@@ -74,12 +68,6 @@ public class JdbcGameStateDao implements GameStateDao{
                     psychic.setCurrentGuess(rs.getInt("current_guess"));
                 }
             }
-            // to make a GameStateDTO you must make a psychic
-            // to make a Psychic you must make a List<Vision> and List<Prediction>
-            // but you only need visions if phase >= 4
-            // and you only need current_guess if phase >= 5
-            // and you only need predictions if phase == 6 
-            // you can check gameStateDTO.getPhase() to find out
         }
         gameStateDTO.addPsychicToList(psychic);
         rs.last();
@@ -104,8 +92,6 @@ public class JdbcGameStateDao implements GameStateDao{
 
         while(results.next()){
             Prediction prediction = new Prediction(results.getInt("player_id"), results.getInt("foreign_player_id"), results.getBoolean("prediction"));
-            //idk, add it to the psychic it belongs to from here
-            //for each over the psychics
             for(Psychic psychic : gameStateDTO.getPsychicList()){
                 if(prediction.getPlayerId() == psychic.getPlayerId()){
                     psychic.addPredictionToList(prediction);
@@ -115,5 +101,61 @@ public class JdbcGameStateDao implements GameStateDao{
         }
         
         return gameStateDTO;
+    }
+
+    public void startNewGame(int ghostId, int psychicOneId, int psychicTwoId, int psychicThreeId){
+        String sql = "delete from vision_player; " +
+                "delete from player_prediction; " +
+                "delete from murders; " +
+                "delete from players; " +
+                "update game_card set zone = 'deck'; " +
+                "update visions set zone = 'deck'; " +
+                "update games set night = 0, phase = 0, number_of_psychics = 3; " +
+                "insert into players (player_id, role, game_id, psychic_level, remaining_guesses, investigation_phase, current_guess) " +
+                "values (?, 'ghost', 1, 0, 0, 0, -1), (?, 'psychic', 1, 0, 4, 0, -1), (?, 'psychic', 1, 0, 4, 0, -1), (?, 'psychic', 1, 0, 4, 0, -1); " +
+                "update game_card set zone = 'play' " +
+                "where game_card_id in (select game_card_id from game_card where card_type_id = 1 order by RANDOM() limit 6); " +
+                "update game_card set zone = 'play' " +
+                "where game_card_id in (select game_card_id from game_card where card_type_id = 2 order by RANDOM() limit 6); " +
+                "update game_card set zone = 'play' " +
+                "where game_card_id in (select game_card_id from game_card where card_type_id = 3 order by RANDOM() limit 6);";
+
+        jdbcTemplate.execute(sql);
+    }
+    
+    public List<GameCard> generateGameCards(){
+        String sql = "update game_card " +
+                "set location = 'play' " +
+                "where game_card_id in ( " +
+                "select game_card_id " +
+                "from game_card " +
+                "where card_type_id = 1 " +
+                "order by random() " +
+                "limit 6); " +
+                "update game_card " +
+                "set location = 'play' " +
+                "where game_card_id in ( " +
+                "select game_card_id " +
+                "from game_card " +
+                "where card_type_id = 2 " +
+                "order by random() " +
+                "limit 6); " +
+                "update game_card " +
+                "set location = 'play' " +
+                "where game_card_id in ( " +
+                "select game_card_id " +
+                "from game_card " +
+                "where card_type_id = 3 " +
+                "order by random() " +
+                "limit 6);" +
+                "select game_card_id, card_type_id, img_url from game_card " +
+                "where location = 'play' " +
+                "order by game_card_id;";
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(sql);
+        List<GameCard> gameCards = new ArrayList<>();
+        while(rs.next()){
+            gameCards.add(new GameCard(rs.getInt("game_card_id"), rs.getInt("card_type_id"), rs.getString("img_url")));
+        }
+        return gameCards;
     }
 }

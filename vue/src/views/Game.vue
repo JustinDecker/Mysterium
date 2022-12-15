@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="game">
     <h1>Home</h1>
     <p>You are {{ this.$store.state.user.username }}</p>
   </div>
@@ -7,6 +7,6 @@
 
 <script>
 export default {
-  name: "home"
+  name: "game"
 };
 </script>
