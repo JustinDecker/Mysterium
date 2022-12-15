@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export default {
-    getGameStateByUsername(username){
-        return axios.get(`examples/${username}`)
+    getGameStateByUsername(){
+        return axios.get(`game`)
     }
 }

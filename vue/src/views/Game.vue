@@ -6,7 +6,26 @@
 </template>
 
 <script>
+import gameStateService from "@/services/GameStateService.js";
 export default {
-  name: "game"
+  name: "game",
+  data() {
+    return {
+      GameState: {},
+      updateStatus: "unset"
+    }
+  },
+  created() {
+    this.getGameStateByUsername(this.$store.state.user.username);
+  },
+  methods: {
+    getGameStateByUsername(){
+      gameStateService.getGameStateByUsername().then((response) => {
+        if(response.status == 200){
+          this.GameState = response.data;
+        }
+      })
+  },
+},
 };
 </script>
