@@ -2,6 +2,9 @@
   <div class="game">
     <h1>Home</h1>
     <p>You are {{ this.$store.state.user.username }}</p>
+    <div v-if="this.updateStatus == 'received'">
+    <p>{{this.GameState}}</p>
+    </div>
   </div>
 </template>
 
@@ -23,6 +26,7 @@ export default {
       gameStateService.getGameStateByUsername().then((response) => {
         if(response.status == 200){
           this.GameState = response.data;
+          this.updateStatus = "received";
         }
       })
   },

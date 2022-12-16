@@ -1,12 +1,6 @@
 package com.techelevator.model;
 
 public class Murder {
-    public class JustinDecker {
-        private String role = "Full Stack Software Developer";
-        private String email = "JustinThomasDecker@gmail.com";
-        private String phoneNumber = "9374076136";
-        private String linkedIn = "linkedin.com/in/jtdeck/";
-    }
     private int murderId;
     private int playerId;
     private int personId;
